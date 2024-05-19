@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>My First Terminal</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/xterm@4.19.0/css/xterm.css"
+		/>
+		<script src="https://cdn.jsdelivr.net/npm/xterm@4.19.0/lib/xterm.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<style>
+			body,
+			html {
+				height: 100%;
+				margin: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				background-size: cover;
+				background-repeat: no-repeat;
+				font-family: monospace; /* Set a nice monospace font */
+				background-color: black;
+			}
+
+			.header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				width: 100%;
+				padding: 10px;
+				color: #ddd;
+			}
+
+			.logo {
+				width: 50px;
+				height: 50px;
+			}
+
+			#terminal {
+				width: 80%;
+				height: 60vh;
+				padding: 20px;
+				border-radius: 5px;
+				background-color: #000;
+				color: #fff;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+			}
+		</style>
+	</head>
+	<body>
+		<header class="header">
+			<h1>Interactive Terminal</h1>
+			<img
+				src="https://cdn-ilaeled.nitrocdn.com/xjlTIzzcFlDZkNcCPnCAGIxXrnjmbkuM/assets/images/optimized/wp-content/uploads/2023/08/74a2bbcc859d0fd6dabdcfb7c8f86450.logo-dont-stretch.svg"
+				alt="Logo"
+				class="logo"
+			/>
+		</header>
+		<div id="terminal" class="terminal-container"></div>
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const socket = io(); // Connect to the Socket.IO server
+				const terminalContainer = document.getElementById('terminal');
+				const term = new Terminal({
+					cursorBlink: true,
+				});
+
+				term.open(terminalContainer);
+
+				socket.on('data', (data) => {
+					term.write(data);
+				});
+
+				term.onKey((e) => {
+					socket.emit('command', e.key);
+				});
+
+				window.addEventListener('beforeunload', () => {
+					socket.disconnect();
+					term.dispose();
+				});
+			});
+		</script>
+	</body>
+</html>
